@@ -3,12 +3,10 @@ package org.example;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 
 //public class Main {
@@ -31,7 +29,7 @@ public class Main extends Application {
     public void showBaseWindow() {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(Controller.class.getResource("/org.example/second.fxml"));
+            loader.setLocation(Controller.class.getResource("/main.fxml"));
             HBox rootLayout = loader.load();
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
