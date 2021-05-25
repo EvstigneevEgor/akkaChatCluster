@@ -1,15 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox prefHeight="579.0" prefWidth="802.0" stylesheets="main.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ControllerImplJava">
+<HBox prefHeight="579.0" prefWidth="802.0" stylesheets="main.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ControllerImplJava">
    <children>
-      <ListView prefHeight="579.0" prefWidth="57.0" style="-fx-pref-width: 20%; -fx-min-width: 250;" />
+      <VBox prefHeight="200.0" prefWidth="100.0">
+         <children>
+            <Label alignment="BOTTOM_LEFT" text="Введите свой никнейм:">
+               <VBox.margin>
+                  <Insets left="10.0" top="16.0" />
+               </VBox.margin>
+            </Label>
+            <TextField alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+               <VBox.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </VBox.margin>
+            </TextField>
+            <ListView prefHeight="579.0" prefWidth="57.0" style="-fx-pref-width: 20%; -fx-min-width: 250;" VBox.vgrow="ALWAYS" />
+         </children>
+      </VBox>
       <VBox alignment="TOP_CENTER" prefHeight="579.0" prefWidth="471.0" HBox.hgrow="ALWAYS">
          <children>
-            <ListView fx:id="MessageList" depthTest="ENABLE" prefHeight="322.0" prefWidth="406.0" VBox.vgrow="ALWAYS">
+            <ListView fx:id="MessageList" depthTest="ENABLE" prefHeight="430.0" prefWidth="552.0" VBox.vgrow="ALWAYS">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
@@ -21,7 +36,7 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
                   </TextArea>
-                  <Button fx:id="Send" mnemonicParsing="false" prefHeight="82.0" prefWidth="73.0" text="Отправить">
+                  <Button fx:id="Send" mnemonicParsing="false" prefHeight="53.0" prefWidth="84.0" text="Отправить">
                      <HBox.margin>
                         <Insets bottom="10.0" right="10.0" top="10.0" />
                      </HBox.margin>
