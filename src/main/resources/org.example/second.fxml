@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
 
-<HBox prefHeight="579.0" prefWidth="802.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<HBox prefHeight="579.0" prefWidth="802.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.ControllerImplJava">
    <children>
       <ListView prefHeight="579.0" prefWidth="57.0" style="-fx-pref-width: 20%; -fx-min-width: 250;" />
       <VBox alignment="TOP_CENTER" prefHeight="579.0" prefWidth="471.0" HBox.hgrow="ALWAYS">
