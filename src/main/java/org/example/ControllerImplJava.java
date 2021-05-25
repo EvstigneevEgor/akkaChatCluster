@@ -7,61 +7,42 @@ import javafx.scene.control.SelectionMode;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class ControllerImplJava extends Controller implements Initializable{
-    /*
-    @Override
-    public void getPost() {
-        super.getPost();
-    }
-
-    @Override
-    public void sendPost(Messenge messenge) {
-        super.sendPost(messenge);
-    }
-*/
+public class ControllerImplJava extends Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-            ListMessenge.setCellFactory(param -> new ListCell<Messenge>() {
-                @Override
-                protected void updateItem(Messenge item, boolean empty) {
-                    super.updateItem(item, empty);
+        MessageList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Message item, boolean empty) {
+                super.updateItem(item, empty);
 
-                    if (empty || item == null || item.getPostText() == null ) {
-                        setText(null);
-                    } else {
-                        setText(item.getPostText());
-                    }
+                if (empty || item == null || item.getPostText() == null) {
+                    setText(null);
+                } else {
+                    setText(item.getPostText());
                 }
-            });
+            }
+        });
 
+        Message n = new Message();
+        MessageList.getItems().add(n);
+        MessageList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        //ListMessenge.getItems().addAll(addTestStudents());
-        Messenge n = new Messenge();
-        ListMessenge.getItems().add(n);
-        ListMessenge.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-       /* ListMessenge.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                showMessenge(newValue);
-            });*/
-            Send.setOnAction(event -> Sender());
+        Send.setOnAction(event -> Sender());
 
-
+        PostText.setPromptText("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435!");
 
     }
-/*
-    private void showMessenge(Messenge newValue) {
-
-        if(newValue!= null){
-
-        }else{
-
-        }
-    }*/
 
     private void Sender() {
-        Messenge m = new Messenge(PostText.getText());
-        ListMessenge.getItems().add(m);
-        PostText.clear();
+        if (!PostText.getText().equals("")) {
+            Message m = new Message(PostText.getText());
+            Message def = new Message();
+            if (MessageList.getItems().get(0).getPostText().equals("\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f"))
+                MessageList.getItems().remove(0);
+            MessageList.getItems().add(m);
+            PostText.clear();
+        }
     }
 }

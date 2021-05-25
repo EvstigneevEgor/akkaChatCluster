@@ -8,10 +8,10 @@ import javafx.scene.control.TextArea;
 
 public class Controller {
 
-    public String url = "second.fxml";
+    public String url = "main.fxml";
 
     @FXML
-    protected ListView<Messenge> ListMessenge;
+    protected ListView<Message> MessageList;
 
     @FXML
     protected Button Send;
@@ -19,14 +19,12 @@ public class Controller {
     @FXML
     protected SplitPane window1;
 
-
-
     @FXML
     protected TextArea PostText;
 
     @FXML
     void initialize() {
-        assert ListMessenge != null : "fx:id=\"ListMessenge\" was not injected: check your FXML file 'first.fxml'.";
+        assert MessageList != null : "fx:id=\"MessageList\" was not injected: check your FXML file 'first.fxml'.";
         assert Send != null : "fx:id=\"Send\" was not injected: check your FXML file 'first.fxml'.";
         assert PostText != null : "fx:id=\"PostText\" was not injected: check your FXML file 'first.fxml'.";
     }
