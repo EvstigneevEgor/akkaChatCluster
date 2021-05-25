@@ -3,36 +3,13 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.7'
     id 'application'
     id 'scala'
-    //id "com.lightbend.akka.grpc.gradle" version "1.1.1-64-6c573988"
 }
-
-//List of variables used in the file.
-ext {
-    //Scala version variables.
-    scalaBinaryVersion = '2.12'
-    scalaMajor = '2.12'
-    scalaMinorVersion = '6'
-    scalaVersion = "$scalaBinaryVersion.$scalaMinorVersion"
-
-    //Junit Version
-    jUnitVersion = '4.12'
-
-    //Version for ScalaTest library.
-    scalaTestVersion = '3.0.1'
-
-
-    //Version for Akka.
-    akkaVersion = '2.5.14'
-}
-
 
 group 'org.example'
 version '1.0-SNAPSHOT'
 sourceCompatibility = 11
 repositories {
-    mavenLocal()
     mavenCentral()
-    jcenter()
 }
 javafx {
     version = '11.0.2'
@@ -43,26 +20,14 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     compile 'org.scala-lang:scala-library:2.13.1'
-
-    //Support to scala language.
-    implementation "org.scala-lang:scala-library:$scalaVersion"
-
-    //Basic support for Akka.
-    implementation "com.typesafe.akka:akka-actor_$scalaMajor:$akkaVersion"
-    implementation "com.typesafe.akka:akka-cluster_$scalaMajor:$akkaVersion"
-    implementation "com.typesafe.akka:akka-cluster-tools_$scalaMajor:$akkaVersion"
-
-    //Useful maybe?
-    compile group: 'com.typesafe.akka', name: 'akka-cluster-metrics_2.12', version: '2.5.17'
-
-    //Dependency for Junit.
-    testImplementation "junit:junit:$jUnitVersion"
-
-
-    // Dependency for ScalaTest.
-    testImplementation "org.scalatest:scalatest_2.12:$scalaTestVersion"
+    compile group: 'com.typesafe.akka', name: "akka-actor-typed_2.13", version: '2.6.9'
+    compile group: 'com.typesafe.akka', name: "akka-remote_2.13", version: '2.6.9'
+    compile group: 'com.typesafe.akka', name: "akka-cluster-typed_2.13", version: '2.6.9'
+    compile group: 'com.typesafe.akka', name: "akka-cluster_2.13", version: '2.6.9'
+    compile group: 'org.slf4j', name: "slf4j-simple", version: '1.7.21'
 }
 
 application {
     mainClassName = 'org.example.Main'
 }
+//mainClassName = 'org.example.Gui'
