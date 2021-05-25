@@ -60,8 +60,14 @@ public class ControllerImplJava extends Controller implements Initializable{
     }*/
 
     private void Sender() {
+        if(PostText.getText()!=""){
         Messenge m = new Messenge(PostText.getText());
+        Messenge def = new Messenge();
+        if(ListMessenge.getItems().get(0).getPostText()=="\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f")
+            ListMessenge.getItems().remove(0);
         ListMessenge.getItems().add(m);
         PostText.clear();
+        }
+        PostText.setText("\u0432\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435!");
     }
 }
