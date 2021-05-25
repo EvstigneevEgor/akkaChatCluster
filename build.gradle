@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+    id 'application'
+    id 'scala'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 11
+repositories {
+    mavenCentral()
+}
+javafx {
+    version = '11.0.2'
+    modules = ['javafx.controls', 'javafx.fxml']
+
+}
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    compile 'org.scala-lang:scala-library:2.13.1'
+}
+application {
+    mainClassName = 'org.example.Main'
+}
+//mainClassName = 'org.example.Gui'
