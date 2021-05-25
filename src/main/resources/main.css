@@ -1,3 +1,17 @@
+/*    --background-blue: #88E8F2;*/
+/*    --background-pink: #F2C9E0;*/
+/*    --border-pink: #F28DBC;*/
+/*    --border-blue: #8FC4D9;*/
+/*    --button-color: #F28DBC;*/
+
 .button {
-    -fx-background-color: #4CAF50;
+    -fx-background-color: #F28DBC;
+}
+
+.list-view {
+    -fx-background-color: #F2C9E0;
+}
+
+.text-area {
+    -fx-border-color: #F28DBC;
 }
