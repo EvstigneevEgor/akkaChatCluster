@@ -1,4 +1,3 @@
-/*
 package org.example
 
 import akka.cluster.ClusterEvent._
@@ -40,7 +39,7 @@ class ClusterActor extends Actor with ActorLogging {
       log.info(s"[Listener] event: $ev")
   }
 }
-
+/*
 object AkkaClusterExample extends App {
   val system = ActorSystem("system")
 
@@ -48,4 +47,5 @@ object AkkaClusterExample extends App {
 
   system.actorOf(Props[ClusterActor], "clusterActor")
   Await.ready(system.whenTerminated, 365.days)
-}*/
+}
+*/

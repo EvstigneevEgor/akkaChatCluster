@@ -8,14 +8,18 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-
-//public class Main {
-public class Main extends Application {
+public class FxStart extends Application {
     private Stage primaryStage;
     //private MainScala cluster = new MainScala();
     public static void main(String[] args) {
+
+        for(String each : args){
+            System.out.println(each);
+        }
         Application.launch();
     }
+
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -24,7 +28,6 @@ public class Main extends Application {
         primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440");
         //primaryStage.setWidth(900);
         //primaryStage.setHeight(500);
-
         showBaseWindow();
     }
 
@@ -34,7 +37,7 @@ public class Main extends Application {
             loader.setLocation(Controller.class.getResource("/main.fxml"));
             HBox rootLayout = loader.load();
             Scene scene = new Scene(rootLayout);
-            ControllerImplJava controller = loader.load();
+
             primaryStage.setScene(scene);
             loader.getController();
             primaryStage.show();
@@ -42,5 +45,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
+    public void showB(){
+
+    }
 }
-//}
