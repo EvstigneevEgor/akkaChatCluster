@@ -1,3 +1,4 @@
+/*
 package org.example
 
 import akka.actor.{ActorSystem, Props}
@@ -10,3 +11,4 @@ class MainScala extends App{
   val sessionManager = system.actorOf(Props[Messenger], "Messenger")
 
 }
+*/
