@@ -28,6 +28,6 @@ dependencies {
 }
 
 application {
-    mainClassName = 'org.example.Main'
+    mainClassName = 'org.example.MainScala'
 }
 //mainClassName = 'org.example.Gui'
