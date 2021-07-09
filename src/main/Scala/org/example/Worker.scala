@@ -20,10 +20,12 @@ object Worker {
     Behaviors.setup { ctx =>
       // each worker registers themselves with the receptionist
       ctx.log.info("Registering myself with receptionist")
+
       ctx.system.receptionist ! Receptionist.Register(WorkerServiceKey, ctx.self)
 
       Behaviors.receiveMessage {
         case TransformText(text, replyTo) =>
+          ctx.log.info("hi, i do UpperCase this text ("+text+") from - "+replyTo.path.toString)
           replyTo ! TextTransformed(text.toUpperCase)
           Behaviors.same
       }

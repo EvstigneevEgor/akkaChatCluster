@@ -7,11 +7,11 @@ import com.typesafe.config.ConfigFactory
 object MainScala extends App{
 
   // starting 2 frontend nodes and 3 backend nodes
-    startup("backend", 25251)
+    //startup("backend", 25251)
     startup("backend", 25252)
+    //startup("frontend", 25252)
     //startup("frontend", 0)
     //startup("frontend", 0)
-    startup("frontend", 0)
 
   object RootBehavior {
     def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
@@ -50,9 +50,10 @@ object MainScala extends App{
         akka.remote.artery.canonical.port=$port
         akka.cluster.roles = [$role]
         """)
-      .withFallback(ConfigFactory.load("transformation"))
+      // я не понимаю почему надо писать (akka.actor.provider = cluster) оно уже указано в config ¯\_(ツ)_/¯
+      .withFallback(ConfigFactory.load(ConfigFactory.load()))
 
-    ActorSystem[Nothing](RootBehavior(), "ClusterSystem", config)
+    ActorSystem[Nothing](RootBehavior(), "system", config)
 
   }
 
