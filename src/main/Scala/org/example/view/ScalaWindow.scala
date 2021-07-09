@@ -1,3 +1,4 @@
+/*
 package org.example.view
 
 import akka.actor.ActorRef
@@ -49,3 +50,4 @@ class ScalaWindow extends Application{
     }
   }
 }
+*/
