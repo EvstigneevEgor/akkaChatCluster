@@ -1,3 +1,4 @@
+/*
 package org.example.view
 
 class Contacts(adr:String,name:String) {
@@ -7,3 +8,4 @@ class Contacts(adr:String,name:String) {
   def setName = Name
   def getAdress = address
 }
+*/

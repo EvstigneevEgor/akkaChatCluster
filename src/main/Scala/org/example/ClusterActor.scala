@@ -1,3 +1,4 @@
+/*
 package org.example
 
 import akka.cluster.ClusterEvent._
@@ -13,7 +14,7 @@ import scala.collection.mutable.HashMap
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, DurationInt}
 //import akka.actor.{ActorSystem, Props}
-import org.example.MainScala.system
+//import org.example.MainScala.system
 
 class ClusterActor extends Actor with ActorLogging {
   val cluster = Cluster(context.system)
@@ -59,3 +60,4 @@ class ClusterActor extends Actor with ActorLogging {
 
   }
 }
+*/

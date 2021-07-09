@@ -1,3 +1,4 @@
+/*
 package org.example.view
 
 import com.sun.tools.javac.comp.Enter
@@ -80,3 +81,4 @@ class ControllerScala extends Controller with Initializable {
 
 
 }
+*/

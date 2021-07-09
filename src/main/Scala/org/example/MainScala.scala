@@ -1,25 +1,36 @@
 
 package org.example
-
-
-import akka.actor.{ActorSystem, Props}
-import javafx.application.Application
-import javafx.application.{Application, Platform}
-import akka.actor.{Actor, ActorLogging}
-import akka.cluster.Cluster
-import akka.cluster.ClusterEvent._
-import akka.pattern.ask
-import javafx.fxml.FXMLLoader
-import javafx.scene.Scene
-import javafx.scene.layout.HBox
-import javafx.stage.Stage
-import org.example.view.ScalaWindow
-
-import java.io.IOException
-import scala.collection.mutable.HashMap
-import scala.jdk.CollectionConverters._
-
+import akka.actor.typed.{ActorSystem, Behavior}
+import akka.actor.typed.scaladsl.Behaviors
+import akka.cluster.typed.Cluster
+import com.typesafe.config.ConfigFactory
 object MainScala extends App{
+
+  // starting 2 frontend nodes and 3 backend nodes
+    startup("backend", 25251)
+    startup("backend", 25252)
+    //startup("frontend", 0)
+    //startup("frontend", 0)
+    startup("frontend", 0)
+
+  object RootBehavior {
+    def apply(): Behavior[Nothing] = Behaviors.setup[Nothing] { ctx =>
+      val cluster = Cluster(ctx.system)
+
+      if (cluster.selfMember.hasRole("backend")) {
+        val workersPerNode =
+         // ctx.system.settings.config.getInt("transformation.workers-per-node")
+
+          ctx.spawn(Worker(), "Worker")
+
+      }
+      if (cluster.selfMember.hasRole("frontend")) {
+        ctx.spawn(Frontend(), "Frontend")
+      }
+      Behaviors.empty
+    }
+  }
+/*
   //def SetNick(getText: String) = NickName=getText
   val Address="akka://system@127.0.0.1:2511"
   val system = ActorSystem("system")
@@ -30,6 +41,19 @@ object MainScala extends App{
   def getClusterN = clusterListener ;
 
   Application.launch(classOf[ScalaWindow])
+*/
 
+  def startup(role: String, port: Int): Unit = {
+    // Override the configuration of the port and role
+    val config = ConfigFactory
+      .parseString(s"""
+        akka.remote.artery.canonical.port=$port
+        akka.cluster.roles = [$role]
+        """)
+      .withFallback(ConfigFactory.load("transformation"))
+
+    ActorSystem[Nothing](RootBehavior(), "ClusterSystem", config)
+
+  }
 
 }

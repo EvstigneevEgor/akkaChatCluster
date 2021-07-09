@@ -1,3 +1,4 @@
+/*
 package org.example.view
 
 import javafx.beans.property.SimpleStringProperty
@@ -20,3 +21,4 @@ class Message() {
     this.PostText.set(postText)
   }
 }
+*/

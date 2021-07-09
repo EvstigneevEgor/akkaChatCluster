@@ -1,3 +1,4 @@
+/*
 package org.example.view
 
 import javafx.fxml.FXML
@@ -18,4 +19,4 @@ class Controller {
     assert(Send != null, "fx:id=\"Send\" was not injected: check your FXML file 'first.fxml'.")
     assert(PostText != null, "fx:id=\"PostText\" was not injected: check your FXML file 'first.fxml'.")
   }
-}
+}*/
