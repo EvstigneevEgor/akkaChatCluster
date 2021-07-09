@@ -1,0 +1,31 @@
+/*    --background-blue: #88E8F2;*/
+/*    --background-pink: #F2C9E0;*/
+/*    --border-pink: #F28DBC;*/
+/*    --border-blue: #8FC4D9;*/
+/*    --button-color: #F28DBC;*/
+/*    --darkest-pink: #D96690;*/
+
+#body {
+    -fx-background-color: #88E8F2;
+}
+
+#left-side {
+    -fx-border-color: #D96690;
+    -fx-border-width: 0 1 0 0;
+}
+
+.text-field {
+    -fx-border-color: #F28DBC;
+}
+
+#contacts {
+    -fx-background-color: #F2C9E0;
+}
+
+.button {
+    -fx-background-color: #F28DBC;
+}
+
+.text-area {
+    -fx-border-color: #F28DBC;
+}
