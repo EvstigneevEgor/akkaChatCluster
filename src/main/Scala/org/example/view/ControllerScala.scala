@@ -44,7 +44,21 @@ class ControllerScala extends Controller with Initializable {
         else setText(item.getName)
       }
     })
-
+    ContactList.getSelectionModel.setSelectionMode(SelectionMode.SINGLE)
+    import javafx.beans.value.ChangeListener
+    import javafx.beans.value.ObservableValue
+    ContactList.getSelectionModel.selectedItemProperty.addListener(new ChangeListener[Contacts]() {
+      override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newValue: Contacts): Unit = {
+        MessageList.getItems.add(new Message("OLD: " + (oldValue) + ",  NEW: " + newValue))
+      }
+    })
+    MessageList.setCellFactory((param: ListView[Message]) => new ListCell[Message]() {
+      override protected def updateItem(item: Message, empty: Boolean): Unit = {
+        super.updateItem(item, empty)
+        if (empty || item == null || item.getPostText == null) setText(null)
+        else setText(item.getPostText)
+      }
+    })
     val n = new Message
     MessageList.getItems.add(n)
     MessageList.getSelectionModel.setSelectionMode(SelectionMode.MULTIPLE)
@@ -83,13 +97,7 @@ class ControllerScala extends Controller with Initializable {
         PostText.setPromptText("таймер сработал уже "+counter.toString + " раз")
         ContactList.getItems.clear()
         ContactList.getItems.addAll(newlist.getItems)
-        MessageList.setCellFactory((param: ListView[Message]) => new ListCell[Message]() {
-          override protected def updateItem(item: Message, empty: Boolean): Unit = {
-            super.updateItem(item, empty)
-            if (empty || item == null || item.getPostText == null) setText(null)
-            else setText(item.getPostText)
-          }
-        })
+
         counter += 1
           Thread.sleep(10)
 
@@ -98,20 +106,6 @@ class ControllerScala extends Controller with Initializable {
     }.start()
   }
 
-  /*
-    var s = MainScala.getClusterN.ask(GetAdressName())
-    var f =Await.result(s, 10.second).asInstanceOf[mutable.HashMap[String, String]]
-    MessageList.getItems.add(new Message(f.mkString(" ")))
-  }
-
-  def setCluster(): Unit = {
-  }
-
-
-}
-*/
-
-  import javafx.application.Platform
 
 
 }
