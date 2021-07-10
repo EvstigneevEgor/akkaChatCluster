@@ -1,4 +1,3 @@
-/*
 package org.example.view
 
 import akka.actor.ActorRef
@@ -14,7 +13,6 @@ import java.io.IOException
 class ScalaWindow extends Application{
   private var primaryStage: Stage = null
 
-  private var aktor: ActorRef = MainScala.getClusterN
   def main(args: Array[String]): Unit = {
 
     Application.launch()
@@ -23,9 +21,10 @@ class ScalaWindow extends Application{
 
   override def start(primaryStage: Stage): Unit = {
     try {
+
       this.primaryStage = primaryStage
       //MainScala cluster = new MainScala();
-      primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440"+aktor.path.toString)
+      primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440"+MainScala.LocalPort)
       //primaryStage.setWidth(900);
       //primaryStage.setHeight(500);
       showBaseWindow()
@@ -50,4 +49,3 @@ class ScalaWindow extends Application{
     }
   }
 }
-*/
