@@ -20,7 +20,7 @@ import scala.concurrent.duration.DurationInt
 import scala.reflect.ClassManifestFactory.Nothing
 object MainScala extends App{
   implicit val timeout: Timeout = 5.seconds
-val LocalPort = 25253;
+val LocalPort = 25252;
 
     startup("frontend", LocalPort)
 
