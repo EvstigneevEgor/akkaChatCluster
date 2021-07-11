@@ -6,12 +6,14 @@ import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior, scaladsl}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.Cluster
+
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import javafx.application.Application
 import javafx.scene.control.ListView
-import org.example.Frontend.{NewNameF, UpdateInformations}
-import org.example.view.{Contacts, ScalaWindow}
+
+import org.example.Frontend.{NewNameF, SendMessageF, UpdateInformations}
+import org.example.view.{Contacts, Message, ScalaWindow}
 
 import scala.concurrent.Await
 import scala.util.Failure
@@ -20,7 +22,7 @@ import scala.concurrent.duration.DurationInt
 import scala.reflect.ClassManifestFactory.Nothing
 object MainScala extends App{
   implicit val timeout: Timeout = 5.seconds
-val LocalPort = 25252;
+val LocalPort = 25251
 
     startup("frontend", LocalPort)
 
@@ -72,4 +74,9 @@ val LocalPort = 25252;
   def reName(newName: String):Unit = {
     frontend.tell(NewNameF(newName))
   }
+  def sendMessage( message: Message):Unit = {
+    frontend.tell(SendMessageF(message))
+  }
+
+
 }
