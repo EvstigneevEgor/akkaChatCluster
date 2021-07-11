@@ -11,8 +11,8 @@ import akka.actor.typed.scaladsl.Behaviors
 import javafx.collections.FXCollections
 import javafx.scene.control.ListView
 import org.example.MainScala.context
-import org.example.Worker.{MyName, MyNameAsk, NewName, TextTransformed}
-import org.example.view.Contacts
+import org.example.Worker.{MyName, MyNameAsk, NewName, SendMessage}
+import org.example.view.{Contacts, Message}
 
 import scala.collection.mutable
 import scala.{+:, :+}
@@ -24,19 +24,31 @@ import scala.util.Success
 object Frontend {
 
   sealed trait Event
+
   private case object Tick extends Event
+
   private final case class WorkersUpdated(newWorkers: Set[ActorRef[Worker.Command]]) extends Event
-  private final case class TransformCompleted(originalText: String, transformedText: String) extends Event
-  private final case class JobFailed(why: String, text: String) extends Event
-  final case class UpdateInformations( replyTo: ActorRef[AnswerUpdateInformations]) extends Event with CborSerializable
+
+
+  final case class UpdateInformations(replyTo: ActorRef[AnswerUpdateInformations]) extends Event with CborSerializable
+
   final case class AnswerUpdateInformations(WorkersName: ListView[Contacts]) extends CborSerializable
+
   final case class NewNameF(wName: String) extends Event
-var Wrk :ActorRef[Worker.Command] = null
+
+  final case class SendMessageF(message: Message) extends Event
+
+  var Wrk: ActorRef[Worker.Command] = null
+  var mapNameRef = mutable.Map[String, ActorRef[Worker.Command]]()
+  var firstTime = true
+
   def apply(): Behavior[Event] = Behaviors.setup { ctx =>
     Behaviors.withTimers { timers =>
       // subscribe to available workers
       Wrk = ctx.spawn(Worker(), "Worker")
       Wrk.tell(NewName(MainScala.LocalPort.toString))
+      mapNameRef(MainScala.LocalPort.toString) = Wrk
+
       val subscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
         case Worker.WorkerServiceKey.Listing(workers) =>
           WorkersUpdated(workers)
@@ -57,35 +69,53 @@ var Wrk :ActorRef[Worker.Command] = null
         running(ctx, newWorkers.toIndexedSeq, jobCounter)
 
       case NewNameF(wName) =>
-        Wrk.tell(NewName(wName))
-        Behaviors.same
-      case UpdateInformations( replyTo) =>
         implicit val scheduler = ctx.system.scheduler
         implicit val timeout: Timeout = 5.seconds
+
+        Wrk.tell(NewName(wName))
+        Behaviors.same
+      case SendMessageF(message) =>
+        ctx.log.info("eeeeeeeeeeeeeeeeee, we send "+message.getFrom+" ; "+message.getTo )
+        println(mapNameRef.toString)
+        mapNameRef.get(message.getFrom).get.tell(SendMessage(message))
+        mapNameRef.get(message.getTo).get.tell(SendMessage(message))
+        //Wrk.tell(SendMessage(message))
+        Behaviors.same
+      case UpdateInformations(replyTo) =>
+        implicit val scheduler = ctx.system.scheduler
+        implicit val timeout: Timeout = 5.seconds
+
+        var newMapNameRef = mutable.Map[String, ActorRef[Worker.Command]]()
         var VecView = Vector[Contacts]()
-        for (a<-workers){
-          var b = Await.result(a.ask(MyNameAsk(_)),10.seconds).name
+
+        for (a <- workers) {
+
+          val b = Await.result(a.ask(MyNameAsk(_)), 10.seconds).name
           //println("Name - "+b)
-          val pr = (a==Wrk)
-          if (pr) {
-            println(")))))))))))")
-
-          }
-          val buf = (new Contacts(a.path.toString, b,pr))
+          newMapNameRef(b) = a
+          val pr = (a == Wrk)
+          val buf = (new Contacts(a.path.toString, b, pr))
           println(buf)
-          VecView  = VecView :+ buf
+          VecView = VecView :+ buf
         }
-        println("Sort")
-        println(VecView)
-        VecView.sortWith((x,y)=> x.compare(y))
-        println(VecView)
-
-        var buf = new ListView[Contacts]()
-        for (i<- VecView)
-        buf.getItems.add(i)
-        replyTo ! AnswerUpdateInformations(buf)
+        if (newMapNameRef != mapNameRef || firstTime) {
+          mapNameRef = newMapNameRef
+          firstTime = false
+          // println("Sort")
+          //println(VecView)
+          VecView.sortWith((x, y) => x.compare(y))
+          //println(VecView)
+          var buf = new ListView[Contacts]()
+          for (i <- VecView) {
+            buf.getItems.add(i)
+            println(mapNameRef)
+          }
+          replyTo ! AnswerUpdateInformations(buf)
+        }
+        replyTo ! AnswerUpdateInformations(new ListView[Contacts]())
         Behaviors.same
 
     }
 }
+
 //#frontend
