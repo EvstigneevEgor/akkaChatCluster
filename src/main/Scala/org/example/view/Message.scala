@@ -2,10 +2,11 @@ package org.example.view
 
 import akka.serialization.Serializer
 import javafx.beans.property.SimpleStringProperty
-
-class Message() /*extends Serializer*/ {
-  var PostText: SimpleStringProperty = null
-  this.PostText = new SimpleStringProperty("\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f")
+import sun.nio.cs.UTF_8
+@SerialVersionUID(100L)
+class Message() extends Serializable {
+  var PostText: String = null
+  PostText = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f"
   private var From: String = null
   private var To: String = null
   var iPostman =true
@@ -16,7 +17,7 @@ class Message() /*extends Serializer*/ {
     From = from
     To = to
     iPostman = postman
-    this.PostText = new SimpleStringProperty(postText)
+    PostText =postText
   }
 
 
@@ -34,21 +35,58 @@ class Message() /*extends Serializer*/ {
 
   def getPostman:Boolean =iPostman
 
-  def getPostText: String = PostText.get
+  def getPostText: String = PostText
 
-  def postTextProperty: SimpleStringProperty = PostText
+  def postTextProperty: SimpleStringProperty = new SimpleStringProperty(PostText)
 
   def setPostText(postText: String): Unit = {
-    this.PostText.set(postText)
+    PostText=postText
   }
-/*
-  override def identifier: Int =
 
-    
+  override def toString: String = {
+    From+" : "+ To +" | " +PostText
+  }
+/*  override def identifier: Int = 12345678
 
- override def toBinary(o: AnyRef): Array[Byte] = ???
+ override def toBinary(o: AnyRef): Array[Byte] =  o match {
+   case SerPostText(name)  =>
+     name.getBytes(UTF_8)
+   case SerFrom(name) =>
+     name.getBytes(UTF_8)
+   case SerTo(name) =>
+     name.getBytes(UTF_8)
+   /*case SerPostman(name) =>
+     name*/
+   case _ =>
+     throw new IllegalArgumentException(s"Can't serialize object of type ${o.getClass} in [${getClass.getName}]")
+ }
 
-  override def includeManifest: Boolean = ???
+  override def includeManifest: Boolean = true
 
-  override def fromBinary(bytes: Array[Byte], manifest: Option[Class[_]]): AnyRef = ???*/
+  def manifest(obj: AnyRef): String =
+    obj match {
+      case _: SerPostText => PostText
+      case _: SerFrom     => From
+      case _: SerTo     => To
+    }
+
+  override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = {
+    manifest match {
+      case PostText =>
+        SerPostText(new String(bytes, UTF_8))
+
+      case PongManifest =>
+        PingService.Pong
+      case _ =>
+        throw new IllegalArgumentException(s"Unknown manifest [$manifest]")
+    }
+  }*/
 }
+
+case class SerPostText(name: String)
+
+case class SerFrom(name: String)
+
+case class SerTo(name: String)
+
+case class SerPostman(name: Boolean)

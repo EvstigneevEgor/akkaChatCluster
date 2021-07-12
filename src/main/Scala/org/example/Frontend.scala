@@ -11,7 +11,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import javafx.collections.FXCollections
 import javafx.scene.control.ListView
 import org.example.MainScala.context
-import org.example.Worker.{MyName, MyNameAsk, NewName, SendMessage}
+import org.example.Worker.{ChatWithThisParentAsk, MyName, MyNameAsk, NewName, SendMessage}
 import org.example.view.{Contacts, Message}
 
 import scala.collection.mutable
@@ -34,6 +34,10 @@ object Frontend {
 
   final case class AnswerUpdateInformations(WorkersName: ListView[Contacts]) extends CborSerializable
 
+  final case class UpdateMessage(name:String,replyTo: ActorRef[AnswerUpdateMessage]) extends Event with CborSerializable
+
+  final case class AnswerUpdateMessage(Chat: List[Message])
+
   final case class NewNameF(wName: String) extends Event
 
   final case class SendMessageF(message: Message) extends Event
@@ -41,12 +45,13 @@ object Frontend {
   var Wrk: ActorRef[Worker.Command] = null
   var mapNameRef = mutable.Map[String, ActorRef[Worker.Command]]()
   var firstTime = true
-
+  var myWorkerName = ""
   def apply(): Behavior[Event] = Behaviors.setup { ctx =>
     Behaviors.withTimers { timers =>
       // subscribe to available workers
       Wrk = ctx.spawn(Worker(), "Worker")
       Wrk.tell(NewName(MainScala.LocalPort.toString))
+      myWorkerName = MainScala.LocalPort.toString
       mapNameRef(MainScala.LocalPort.toString) = Wrk
 
       val subscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
@@ -71,14 +76,14 @@ object Frontend {
       case NewNameF(wName) =>
         implicit val scheduler = ctx.system.scheduler
         implicit val timeout: Timeout = 5.seconds
-
+        myWorkerName = wName
         Wrk.tell(NewName(wName))
         Behaviors.same
       case SendMessageF(message) =>
         ctx.log.info("eeeeeeeeeeeeeeeeee, we send "+message.getFrom+" ; "+message.getTo )
-        println(mapNameRef.toString)
-        mapNameRef.get(message.getFrom).get.tell(SendMessage(message))
-        mapNameRef.get(message.getTo).get.tell(SendMessage(message))
+        //println(mapNameRef(message.getFrom).toString)
+        mapNameRef(message.getFrom).tell(SendMessage(message))
+        mapNameRef(message.getTo).tell(SendMessage(message))
         //Wrk.tell(SendMessage(message))
         Behaviors.same
       case UpdateInformations(replyTo) =>
@@ -95,7 +100,7 @@ object Frontend {
           newMapNameRef(b) = a
           val pr = (a == Wrk)
           val buf = (new Contacts(a.path.toString, b, pr))
-          println(buf)
+          //println(buf)
           VecView = VecView :+ buf
         }
         if (newMapNameRef != mapNameRef || firstTime) {
@@ -108,14 +113,25 @@ object Frontend {
           var buf = new ListView[Contacts]()
           for (i <- VecView) {
             buf.getItems.add(i)
-            println(mapNameRef)
+            //println(mapNameRef)
           }
           replyTo ! AnswerUpdateInformations(buf)
         }
         replyTo ! AnswerUpdateInformations(new ListView[Contacts]())
         Behaviors.same
+      case UpdateMessage(name,replyTo) =>
+        implicit val scheduler = ctx.system.scheduler
+        implicit val timeout: Timeout = 5.seconds
+        println("{")
+        val b = Await.result(Wrk.ask(ChatWithThisParentAsk(name,_)), 10.seconds).chat
+        b.map(k=>println(k))
+        println("}")
 
+        replyTo ! AnswerUpdateMessage(b)
+        Behaviors.same
     }
 }
+
+
 
 //#frontend
