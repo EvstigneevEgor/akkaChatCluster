@@ -33,7 +33,7 @@ class ControllerScala extends Controller with Initializable {
     if (counter == 0)
     //startThread()
     {
-      timer.scheduleAtFixedRate(timerTask, 0, 10 * 1000)
+      timer.scheduleAtFixedRate(timerTask, 1, 10 * 100)
     }
 
 
@@ -42,6 +42,7 @@ class ControllerScala extends Controller with Initializable {
     import javafx.beans.value.ObservableValue
     ContactList.getSelectionModel.selectedItemProperty.addListener(new ChangeListener[Contacts]() {
       override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newValue: Contacts): Unit = {
+        if(newValue != null)
         partner = newValue.Name
         PostText.setPromptText( partner + " : " + Name)
       }
@@ -91,6 +92,12 @@ class ControllerScala extends Controller with Initializable {
 
         //while (true) {
         var newlist = MainScala.updateListUser
+        if(partner!=null){
+          val newMessage = MainScala.updateListMessage(partner)
+          MessageList.getItems.clear()
+          for(i <- newMessage)
+            MessageList.getItems.add(i)
+        }
         if (!newlist.getItems.isEmpty) {
           newlist.getItems.sorted()
           ContactList.getItems.clear()
@@ -104,7 +111,7 @@ class ControllerScala extends Controller with Initializable {
             }
           })
         } else {
-          println("not update".toUpperCase)
+         // println("not update".toUpperCase)
         }
 
 
