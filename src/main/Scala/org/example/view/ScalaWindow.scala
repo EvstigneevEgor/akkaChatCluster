@@ -1,7 +1,7 @@
 package org.example.view
 
 import akka.actor.ActorRef
-import javafx.application.Application
+import javafx.application.{Application, Platform}
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.scene.layout.HBox
@@ -13,7 +13,6 @@ import java.io.IOException
 class ScalaWindow extends Application{
   private var primaryStage: Stage = null
 
-  private var aktor: ActorRef = MainScala.getClusterN
   def main(args: Array[String]): Unit = {
 
     Application.launch()
@@ -22,16 +21,23 @@ class ScalaWindow extends Application{
 
   override def start(primaryStage: Stage): Unit = {
     try {
+
       this.primaryStage = primaryStage
       //MainScala cluster = new MainScala();
-      primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440"+aktor.path.toString)
-      //primaryStage.setWidth(900);
-      //primaryStage.setHeight(500);
+      primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440"+MainScala.LocalPort)
       showBaseWindow()
     } catch {
       case e: IOException =>
         e.printStackTrace()
     }
+  }
+
+  override def stop(): Unit = {
+
+    Platform.exit()
+    System.exit(0)
+    MainScala.stop()
+    super.stop()
   }
 
   def showBaseWindow(): Unit = {
@@ -40,7 +46,6 @@ class ScalaWindow extends Application{
       loader.setLocation(classOf[Controller].getResource("/main.fxml"))
       val rootLayout: HBox = loader.load
       val scene: Scene = new Scene(rootLayout)
-
       primaryStage.setScene(scene)//loader.getController
       primaryStage.show()
     } catch {
