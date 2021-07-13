@@ -15,13 +15,16 @@
 }
 
 .text-field {
-    -fx-border-color: #F28DBC;
+    -fx-border-color: #f28dbc;
 }
 
 #contacts {
-    -fx-background-color: #F2C9E0;
+    -fx-background-color: #ffffff;
 }
 
+#MessageList{
+    -fx-background-color: #ccfcfc;
+}
 .button {
     -fx-background-color: #F28DBC;
 }

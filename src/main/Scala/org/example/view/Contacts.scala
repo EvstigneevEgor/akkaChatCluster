@@ -29,10 +29,12 @@ class Contacts(adr: String, name: String, me: Boolean)/* extends Ordered[Contact
   }
 
    def compare(that: Contacts): Boolean = {
-    if (itsMe && !that.itsMe) {
+    if(that.Name=="\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442")
+     if (itsMe && !that.itsMe) {
       true
     }else {
       Name < that.Name
     }
-
+    else
+      false
   }}

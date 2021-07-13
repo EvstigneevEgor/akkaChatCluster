@@ -16,6 +16,7 @@ object Worker {
   val WorkerServiceKey: ServiceKey[Command] = ServiceKey[Worker.Command]("Worker")
   var Name = new String
   var mapNameMassenges = mutable.Map[String, List[Message]]()
+
   sealed trait Command
 
 
@@ -25,11 +26,13 @@ object Worker {
 
   final case class MyName(name: String) extends CborSerializable
 
-  final case class ChatWithThisParentAsk(name:String ,replyTo: ActorRef[ChatWithThisParent]) extends Command with CborSerializable
+  final case class ChatWithThisParentAsk(name: String, replyTo: ActorRef[ChatWithThisParent]) extends Command with CborSerializable
 
-  final case class ChatWithThisParent(chat: List[Message])extends  CborSerializable
+  final case class ChatWithThisParent(chat: List[Message]) extends CborSerializable
 
   final case class SendMessage(message: Message) extends Command with CborSerializable
+
+  final case class DieW () extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { ctx =>
@@ -54,29 +57,26 @@ object Worker {
           else {
             message.getFrom
           }
-          println("/*-*/-*/-*/-*/-*/-*/    "+partner)
-          //mapNameMassenges(partner) = mapNameMassenges.get(partner).fold(List(message))((mapNameMassenges(partner) :+ message))
-          if(mapNameMassenges.contains(partner)) {
-            println("new")
+          if (mapNameMassenges.contains(partner)) {
             mapNameMassenges(partner) = mapNameMassenges(partner) :+ message
 
-          }else
-            mapNameMassenges(partner)=List(message)
-          println(mapNameMassenges(partner))
+          } else
+            mapNameMassenges(partner) = List(message)
           Behaviors.same
 
 
-        case ChatWithThisParentAsk(name,replyTo) =>
-          if(mapNameMassenges.contains(name))
-            {
-              println("121212121212",mapNameMassenges(name))
-              replyTo ! ChatWithThisParent(mapNameMassenges(name))
-              Behaviors.same
-            }
-          else{
-            replyTo ! ChatWithThisParent(List (new Message()))
-          Behaviors.same
+        case ChatWithThisParentAsk(name, replyTo) =>
+          if (mapNameMassenges.contains(name)) {
+            replyTo ! ChatWithThisParent(mapNameMassenges(name))
+            Behaviors.same
           }
+          else {
+            replyTo ! ChatWithThisParent(List(new Message()))
+            Behaviors.same
+          }
+
+        case DieW() =>
+          Behaviors.stopped
       }
     }
 }
