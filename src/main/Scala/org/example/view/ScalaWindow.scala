@@ -33,10 +33,10 @@ class ScalaWindow extends Application{
   }
 
   override def stop(): Unit = {
-
+    MainScala.stop()
     Platform.exit()
     System.exit(0)
-    MainScala.stop()
+
     super.stop()
   }
 
