@@ -1,10 +1,8 @@
 package org.example
 
-import akka.actor.typed.ActorRef
-import akka.actor.typed.Behavior
-import akka.actor.typed.receptionist.Receptionist
-import akka.actor.typed.receptionist.ServiceKey
+import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.{ActorRef, Behavior}
 import org.example.view.Message
 
 import scala.collection.mutable
@@ -32,7 +30,7 @@ object Worker {
 
   final case class SendMessage(message: Message) extends Command with CborSerializable
 
-  final case class DieW () extends Command
+  final case class DieW() extends Command
 
   def apply(): Behavior[Command] =
     Behaviors.setup { ctx =>
@@ -80,6 +78,3 @@ object Worker {
       }
     }
 }
-
-
-//#worker
