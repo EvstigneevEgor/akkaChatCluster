@@ -3,6 +3,7 @@ package org.example
 import akka.actor.typed.receptionist.{Receptionist, ServiceKey}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
+import org.example.Frontend.{Event, GotNewMessages}
 import org.example.view.Message
 
 import scala.collection.mutable
@@ -11,9 +12,9 @@ import scala.collection.mutable
 //#worker
 object Worker {
 
-  val WorkerServiceKey: ServiceKey[Command] = ServiceKey[Worker.Command]("Worker")
-  var Name = new String
-  var mapNameMassenges = mutable.Map[String, List[Message]]()
+  val workerServiceKey: ServiceKey[Command] = ServiceKey[Worker.Command]("Worker")
+  var name = new String
+  private val mapNameMassages = mutable.Map[String, List[Message]]()
 
   sealed trait Command
 
@@ -32,44 +33,47 @@ object Worker {
 
   final case class DieW() extends Command
 
-  def apply(): Behavior[Command] =
+  def apply(frontend: ActorRef[Event]): Behavior[Command] =
     Behaviors.setup { ctx =>
       // each worker registers themselves with the receptionist
       ctx.log.info("Registering myself with receptionist")
 
-      ctx.system.receptionist ! Receptionist.Register(WorkerServiceKey, ctx.self)
+      ctx.system.receptionist ! Receptionist.Register(workerServiceKey, ctx.self)
 
       Behaviors.receiveMessage {
 
-        case NewName(name) =>
-          Name = name
+        case NewName(newName) =>
+          name = newName
           Behaviors.same
         case MyNameAsk(replyTo) =>
-          replyTo ! MyName(Name)
+          replyTo ! MyName(name)
           Behaviors.same
         case SendMessage(message) =>
 
-          val partner: String = if (message.getTo != Name) {
-            message.getTo
+          val isMessageToMe = message.To.map(_.getName).contains(name)
+          val partner: String = if (!isMessageToMe) {
+            message.To.map(_.getName).getOrElse("")
           }
           else {
-            message.getFrom
+            message.From.map(_.getName).getOrElse("")
           }
-          if (mapNameMassenges.contains(partner)) {
-            mapNameMassenges(partner) = mapNameMassenges(partner) :+ message
+          if (mapNameMassages.contains(partner)) {
+            mapNameMassages(partner) = mapNameMassages(partner) :+ message
 
           } else
-            mapNameMassenges(partner) = List(message)
+            mapNameMassages(partner) = List(message)
+          if (isMessageToMe)
+            frontend ! GotNewMessages
           Behaviors.same
 
 
         case ChatWithThisParentAsk(name, replyTo) =>
-          if (mapNameMassenges.contains(name)) {
-            replyTo ! ChatWithThisParent(mapNameMassenges(name))
+          if (mapNameMassages.contains(name)) {
+            replyTo ! ChatWithThisParent(mapNameMassages(name))
             Behaviors.same
           }
           else {
-            replyTo ! ChatWithThisParent(List(new Message()))
+            replyTo ! ChatWithThisParent(List(Message()))
             Behaviors.same
           }
 
