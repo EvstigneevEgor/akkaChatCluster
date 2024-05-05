@@ -27,11 +27,9 @@ class ControllerScala extends Controller with Initializable {
     contactList.getSelectionModel.setSelectionMode(SelectionMode.SINGLE)
     contactList.getSelectionModel.selectedItemProperty.addListener(new ChangeListener[Contacts]() {
       override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newValue: Contacts): Unit = {
-        if (newValue != null) {
+        if (newValue != null)
           partner.setValue(newValue)
-          updateListMessage(newValue.getName) //todo here is bug. Fix that. Address doesn`t work. or somewhere threadRacing
-        }
-        postText.setPromptText(partner.getValue.Name + " : " + myContact.getName)
+        updateMessagesAndContacts()
       }
     })
     val textFormatter = new TextFormatter[Contacts](new StringConverter[Contacts] {
@@ -60,7 +58,7 @@ class ControllerScala extends Controller with Initializable {
         if (empty || item == null || item.PostText == null) setText(null)
         else {
           if (item.From.isDefined)
-            setText(item.From.get + ": " + item.PostText)
+            setText(item.From.get.getName + ": " + item.PostText)
           else
             setText(item.PostText)
           setTextAlignment(if (item.From.contains(myContact.getValue)) TextAlignment.LEFT else TextAlignment.RIGHT)
@@ -78,22 +76,32 @@ class ControllerScala extends Controller with Initializable {
     })
 
     messageList.getItems.add(Message())
-
-    //    messageList.getSelectionModel.setSelectionMode(SelectionMode.MULTIPLE)
-
-    send.setOnAction(_ => Sender())
-    login.setOnAction(_ => Login())
+    send.setOnAction { _ =>
+      Sender()
+      updateMessagesAndContacts()
+    }
+    login.setOnAction { _ =>
+      Login()
+      updateMessagesAndContacts()
+    }
     partner.addListener(new ChangeListener[Contacts]() {
       override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newPartnerName: Contacts): Unit = {
-        if (newPartnerName != null)
-          updateListMessage(newPartnerName.getName)
-        updateListUser()
+        println("listen " + newPartnerName)
+        updateMessagesAndContacts()
       }
     })
     updateListUser()
-    postText.setPromptText("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435!")
   }
 
+
+  private def updateMessagesAndContacts(): Unit = {
+    val replyer = partner.getValue
+    if (replyer != null) {
+      updateListMessage(replyer.getName)
+      postText.setPromptText(replyer.name + " : " + myContact.getValue.getName)
+    }
+    updateListUser()
+  }
 
   private def Sender(): Unit = {
     if (!(postText.getText == "")) {
@@ -120,7 +128,7 @@ class ControllerScala extends Controller with Initializable {
     if (!newlist.getItems.isEmpty) {
       contactList.getItems.clear()
       contactList.getItems.addAll(newlist.getItems)
-      contactList.getItems.add(new Contacts("", "\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442", false))
+      contactList.getItems.add(new Contacts("", "Общий чат", false))
     }
   }
 
@@ -157,4 +165,7 @@ class ControllerScala extends Controller with Initializable {
         })
       }
   }
+
+  def setMyContact(contacts: Contacts): Unit = myContact.setValue(contacts)
+
 }

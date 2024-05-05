@@ -30,8 +30,7 @@ class ScalaWindow extends Application {
     try {
 
       this.primaryStage = primaryStage
-      //MainScala cluster = new MainScala();
-      primaryStage.setTitle("\u041f\u0440\u0438\u043c\u0435\u0440" + LocalPort)
+      primaryStage.setTitle(s"Akka Cluster Chat (port:$LocalPort)")
       showBaseWindow()
     } catch {
       case e: IOException =>

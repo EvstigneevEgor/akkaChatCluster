@@ -9,7 +9,7 @@ case class Message(PostText: String, From: Option[Contacts], To: Option[Contacts
   def postTextProperty: SimpleStringProperty = new SimpleStringProperty(PostText)
 
   override def toString: String = {
-    From.map(_.Name) + " : " + To.map(_.Name) + " | " + PostText
+    From.map(_.name) + " : " + To.map(_.name) + " | " + PostText
   }
 
 }
@@ -18,5 +18,5 @@ object Message {
   def apply(): Message =
     Message(PostText = presetMessages, From = None, To = None)
 
-  val presetMessages = "\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f"
+  val presetMessages = "Введите текст сообщения"
 }

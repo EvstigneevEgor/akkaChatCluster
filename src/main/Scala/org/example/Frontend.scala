@@ -24,14 +24,15 @@ class Frontend(scala: ControllerScala, port: String) {
   private var myWorkerName = port
 
   def getActor: Behavior[Event] = Behaviors.setup { ctx =>
-    myWorker = ctx.spawn(Worker(), "Worker")
+    myWorker = ctx.spawn(Worker(ctx.self), "Worker")
     myWorker.tell(NewName(myWorkerName))
     mapName2Worker(myWorkerName) = myWorker
+    scala.setMyContact(new Contacts(myWorker.path.toStringWithoutAddress, myWorkerName, true))
     val subscriptionAdapter = ctx.messageAdapter[Receptionist.Listing] {
-      case Worker.WorkerServiceKey.Listing(workers) =>
+      case Worker.workerServiceKey.Listing(workers) =>
         WorkersUpdated(workers)
     }
-    ctx.system.receptionist ! Receptionist.Subscribe(Worker.WorkerServiceKey, subscriptionAdapter)
+    ctx.system.receptionist ! Receptionist.Subscribe(Worker.workerServiceKey, subscriptionAdapter)
 
     running(ctx, IndexedSeq.empty, jobCounter = 0)
   }
@@ -47,6 +48,7 @@ class Frontend(scala: ControllerScala, port: String) {
       case NewNameF(wName) =>
         mapName2Worker(wName) = mapName2Worker(myWorkerName)
         mapName2Worker.remove(myWorkerName)
+        firstTime = true
         myWorkerName = wName
         myWorker.tell(NewName(wName))
         Behaviors.same
@@ -56,7 +58,7 @@ class Frontend(scala: ControllerScala, port: String) {
         Behaviors.stopped
 
       case SendMessageF(message) =>
-        if (!message.To.map(_.getName).contains("\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442")) {
+        if (!message.To.map(_.getName).contains("Общий чат")) {
           mapName2Worker(message.From.map(_.getName).getOrElse("")).tell(SendMessage(message))
           if (message.From != message.To) {
             mapName2Worker(message.To.map(_.getName).getOrElse("")).tell(SendMessage(message))
@@ -69,6 +71,10 @@ class Frontend(scala: ControllerScala, port: String) {
         }
         Behaviors.same
 
+      case GotNewMessages =>
+        ctx.self ! UpdateMessage(scala.partner.getValue.getName)
+        Behaviors.same
+
       case UpdateInformation =>
         implicit val scheduler: Scheduler = ctx.system.scheduler
         implicit val timeout: Timeout = 5.seconds
@@ -78,7 +84,7 @@ class Frontend(scala: ControllerScala, port: String) {
           val b = Await.result(a.ask(MyNameAsk), 10.seconds).name
           newMapNameRef(b) = a
           val pr = a == myWorker
-          val buf = new Contacts(a.path.toString, b, pr)
+          val buf = new Contacts(a.path.toStringWithoutAddress, b, pr)
           VecView = VecView :+ buf
         }
 
@@ -117,6 +123,8 @@ object Frontend {
   private final case class WorkersUpdated(newWorkers: Set[ActorRef[Worker.Command]]) extends Event
 
   final case object UpdateInformation extends Event with CborSerializable
+
+  final case object GotNewMessages extends Event with CborSerializable
 
   final case class UpdateMessage(name: String) extends Event with CborSerializable
 
