@@ -1,18 +1,15 @@
 package org.example.view
 
-class Contacts(adr: String, name: String, me: Boolean)/* extends Ordered[Contacts]*/ {
-  val address: String = adr
+class Contacts(adr: String, name: String, me: Boolean) {
+  private val address: String = adr
   var Name: String = name
-  var itsMe: Boolean = me
+  private val itsMe: Boolean = me
 
-  def getName = Name
+  def getName: String = Name
 
-  //def setName = Name
-  def getAdress = address
+  def setName(s: String): Unit = Name = s
 
-
-
-   def <(that: Contacts): Boolean = {
+  def <(that: Contacts): Boolean = {
     if (itsMe && !that.itsMe)
       true
     else if (Name < that.Name)
@@ -22,19 +19,20 @@ class Contacts(adr: String, name: String, me: Boolean)/* extends Ordered[Contact
   }
 
   override def toString: String = {
-    if(this != null)
-    "address = " + address + " name = " + Name
+    if (this != null)
+      "address = " + address + " name = " + Name
     else
       "null"
   }
 
-   def compare(that: Contacts): Boolean = {
-    if(that.Name=="\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442")
-     if (itsMe && !that.itsMe) {
-      true
-    }else {
-      Name < that.Name
-    }
+  def compare(that: Contacts): Boolean = {
+    if (that.Name == "\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442")
+      if (itsMe && !that.itsMe) {
+        true
+      } else {
+        Name < that.Name
+      }
     else
       false
-  }}
+  }
+}

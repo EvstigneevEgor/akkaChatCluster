@@ -13,7 +13,7 @@ object Worker {
 
   val WorkerServiceKey: ServiceKey[Command] = ServiceKey[Worker.Command]("Worker")
   var Name = new String
-  var mapNameMassenges = mutable.Map[String, List[Message]]()
+  private val mapNameMassages = mutable.Map[String, List[Message]]()
 
   sealed trait Command
 
@@ -49,27 +49,27 @@ object Worker {
           Behaviors.same
         case SendMessage(message) =>
 
-          val partner: String = if (message.getTo != Name) {
-            message.getTo
+          val partner: String = if (!message.To.map(_.getName).contains(Name)) {
+            message.To.map(_.getName).getOrElse("")
           }
           else {
-            message.getFrom
+            message.From.map(_.getName).getOrElse("")
           }
-          if (mapNameMassenges.contains(partner)) {
-            mapNameMassenges(partner) = mapNameMassenges(partner) :+ message
+          if (mapNameMassages.contains(partner)) {
+            mapNameMassages(partner) = mapNameMassages(partner) :+ message
 
           } else
-            mapNameMassenges(partner) = List(message)
+            mapNameMassages(partner) = List(message)
           Behaviors.same
 
 
         case ChatWithThisParentAsk(name, replyTo) =>
-          if (mapNameMassenges.contains(name)) {
-            replyTo ! ChatWithThisParent(mapNameMassenges(name))
+          if (mapNameMassages.contains(name)) {
+            replyTo ! ChatWithThisParent(mapNameMassages(name))
             Behaviors.same
           }
           else {
-            replyTo ! ChatWithThisParent(List(new Message()))
+            replyTo ! ChatWithThisParent(List(Message()))
             Behaviors.same
           }
 
