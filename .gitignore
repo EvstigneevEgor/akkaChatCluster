@@ -1,0 +1,10 @@
+target
+*.class
+*.iml
+*.ipr
+*.iws
+out
+.idea
+.gradle
+gradle
+.github

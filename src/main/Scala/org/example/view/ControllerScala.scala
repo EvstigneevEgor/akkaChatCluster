@@ -1,76 +1,71 @@
 package org.example.view
 
-import com.sun.tools.javac.comp.Enter
-import javafx.event.{ActionEvent, EventHandler}
+import akka.actor.typed.ActorRef
+import javafx.application.Platform
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.fxml.Initializable
-import javafx.scene.control.{ListCell, ListView, SelectionMode}
-import javafx.scene.input.{KeyCode, KeyEvent}
-import org.example.MainScala
-import akka.pattern.ask
+import javafx.geometry.Pos
+import javafx.scene.control.{ListCell, ListView, SelectionMode, TextFormatter}
+import javafx.scene.text.TextAlignment
+import javafx.util.StringConverter
+import org.example.Frontend._
 
 import java.net.URL
-import java.util.{Comparator, ResourceBundle, Timer, TimerTask}
-import scala.concurrent.duration.DurationInt
-import akka.util.Timeout
-import javafx.application.Platform
-import javafx.geometry.Pos
-import javafx.scene.text.TextAlignment
-
-import scala.collection.mutable
-import scala.concurrent.{Await, Promise}
-
-//import akka.util.duration._
+import java.util.ResourceBundle
 
 class ControllerScala extends Controller with Initializable {
 
-  val timerTask = new MyTimerTask()
-  // стартуем TimerTask в виде демона
-  timerTask.upd(this)
-  val timer = new Timer(true)
+  var frontend: Option[ActorRef[Event]] = None
 
-  implicit val timeout = Timeout(3.seconds)
-  var counter = 0
-  var partner: String = null
-  var Name: String = null
+  def setFrontend(fr: ActorRef[Event]): Unit = frontend = Some(fr)
+
+  var partner: SimpleObjectProperty[Contacts] = new SimpleObjectProperty[Contacts]()
+  private val myContact: SimpleObjectProperty[Contacts] = new SimpleObjectProperty[Contacts](new Contacts("", "", true))
 
   override def initialize(location: URL, resources: ResourceBundle): Unit = {
-    if (counter == 0) {
-      timer.scheduleAtFixedRate(timerTask, 1, 10 * 100)
-    }
-
-    ContactList.getSelectionModel.setSelectionMode(SelectionMode.SINGLE)
-    import javafx.beans.value.ChangeListener
-    import javafx.beans.value.ObservableValue
-    ContactList.getSelectionModel.selectedItemProperty.addListener(new ChangeListener[Contacts]() {
+    contactList.getSelectionModel.setSelectionMode(SelectionMode.SINGLE)
+    contactList.getSelectionModel.selectedItemProperty.addListener(new ChangeListener[Contacts]() {
       override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newValue: Contacts): Unit = {
         if (newValue != null)
-          partner = newValue.Name
-        PostText.setPromptText(partner + " : " + Name)
+          partner.setValue(newValue)
+        updateMessagesAndContacts()
       }
     })
+    val textFormatter = new TextFormatter[Contacts](new StringConverter[Contacts] {
+      override def toString(t: Contacts): String = t.getName
 
-    ContactList.setCellFactory((param: ListView[Contacts]) => new ListCell[Contacts]() {
+      override def fromString(s: String): Contacts = {
+        myContact.getValue.setName(s)
+        myContact.getValue
+      }
+    })
+    textFormatter.valueProperty().bindBidirectional(myContact)
+    nick.setTextFormatter(textFormatter)
+    contactList.setCellFactory(_ => new ListCell[Contacts]() {
       override protected def updateItem(item: Contacts, empty: Boolean): Unit = {
         super.updateItem(item, empty)
         if (empty || item == null || item.getName == null) setText(null)
-        else setText(item.getName)
+        else {
+          setText(item.getName)
+        }
       }
     })
 
-    MessageList.setCellFactory((param: ListView[Message]) => new ListCell[Message]() {
+    messageList.setCellFactory(_ => new ListCell[Message]() {
       override protected def updateItem(item: Message, empty: Boolean): Unit = {
         super.updateItem(item, empty)
-        if (empty || item == null || item.getPostText == null) setText(null)
+        if (empty || item == null || item.PostText == null) setText(null)
         else {
-          if (item.getFrom != null)
-            setText(item.getFrom + ": " + item.getPostText)
+          if (item.From.isDefined)
+            setText(item.From.get.getName + ": " + item.PostText)
           else
-            setText(item.getPostText)
-          setTextAlignment(if (item.getFrom == Name) TextAlignment.LEFT else TextAlignment.RIGHT)
+            setText(item.PostText)
+          setTextAlignment(if (item.From.contains(myContact.getValue)) TextAlignment.LEFT else TextAlignment.RIGHT)
           setAlignment(
-            if (item.getFrom == null)
+            if (item.From.isEmpty)
               Pos.CENTER
-            else if (item.getFrom == Name)
+            else if (item.From.contains(myContact.getValue))
               Pos.CENTER_RIGHT
             else
               Pos.CENTER_LEFT
@@ -80,86 +75,97 @@ class ControllerScala extends Controller with Initializable {
       }
     })
 
-    val n = new Message
-    MessageList.getItems.add(n)
-
-    MessageList.getSelectionModel.setSelectionMode(SelectionMode.MULTIPLE)
-
-    Send.setOnAction((event: ActionEvent) => Sender())
-    Logn.setOnAction((event: ActionEvent) => Login())
-    PostText.setPromptText("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435!")
+    messageList.getItems.add(Message())
+    send.setOnAction { _ =>
+      Sender()
+      updateMessagesAndContacts()
+    }
+    login.setOnAction { _ =>
+      Login()
+      updateMessagesAndContacts()
+    }
+    partner.addListener(new ChangeListener[Contacts]() {
+      override def changed(observable: ObservableValue[_ <: Contacts], oldValue: Contacts, newPartnerName: Contacts): Unit = {
+        println("listen " + newPartnerName)
+        updateMessagesAndContacts()
+      }
+    })
+    updateListUser()
   }
 
+
+  private def updateMessagesAndContacts(): Unit = {
+    val replyer = partner.getValue
+    if (replyer != null) {
+      updateListMessage(replyer.getName)
+      postText.setPromptText(replyer.name + " : " + myContact.getValue.getName)
+    }
+    updateListUser()
+  }
 
   private def Sender(): Unit = {
-    if (!(PostText.getText == "")) { 
-      val m = new Message(PostText.getText, Nck.getText, partner)
-      //val `def` = new Message
-      if (partner != null && Name != null) {
-        MainScala.sendMessage(m)
-        if (MessageList.getItems.get(0).getPostText == "\u0412\u0432\u0435\u0434\u0438\u0442\u0435\u0020\u0442\u0435\u043a\u0441\u0442\u0020\u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f") MessageList.getItems.remove(0)
-        MessageList.getItems.add(m)
-        PostText.clear()
+    if (!(postText.getText == "")) {
+      if (partner != null && myContact != null) {
+        val m = Message(postText.getText, Some(myContact.getValue), Some(partner.getValue))
+        sendMessage(m)
+        if (messageList.getItems.get(0).PostText == Message.presetMessages)
+          messageList.getItems.remove(0)
+        messageList.getItems.add(m)
+        postText.clear()
       }
     }
   }
 
 
-  def Login(): Unit = {
-    if (!(Nck.getText == "")) {
-      MainScala.reName(Nck.getText)
-      Name = Nck.getText
-      timerTask.run()
-      Nck.setEditable(false)
+  private def Login(): Unit = {
+    if (!(nick.getText == "")) {
+      reName(nick.getText)
+      nick.setEditable(false)
     }
   }
 
-  def startThread(): Unit = {
-    new Thread() {
-      override def run(): Unit = { //Do some stuff in another thread
-        if (partner != null) {
+  def updateContactsList(newlist: ListView[Contacts]): Unit = {
+    if (!newlist.getItems.isEmpty) {
+      contactList.getItems.clear()
+      contactList.getItems.addAll(newlist.getItems)
+      contactList.getItems.add(new Contacts("", "Общий чат", false))
+    }
+  }
 
-          val newMessage = MainScala.updateListMessage(partner)
-          if (!newMessage.getItems.isEmpty)
-            if (!MessageList.getItems.containsAll(newMessage.getItems)) {
-              Platform.runLater(new Runnable() {
-                override def run(): Unit = {
-                  MessageList.getItems.clear()
-                  MessageList.getItems.addAll(newMessage.getItems)
-                }
-              })
-            }
-        }
+  def updateListUser(): Unit = {
+    frontend.foreach(fr => fr.tell(UpdateInformation))
+  }
 
-        var newlist = MainScala.updateListUser()
-        if (!newlist.getItems.isEmpty) {
-          newlist.getItems.sorted()
-          Platform.runLater(new Runnable() {
-            override def run(): Unit = {
-              ContactList.getItems.clear()
-              ContactList.getItems.addAll(newlist.getItems)
-              ContactList.getItems.add(new Contacts("", "\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442", false))
-            }
-          })
-        }
+  private def reName(newName: String): Unit = {
+    frontend.foreach(_.tell(NewNameF(newName)))
 
-        counter += 1
-        Thread.sleep(10)
+  }
+
+  private def sendMessage(message: Message): Unit = {
+    frontend.foreach(_.tell(SendMessageF(message)))
+  }
+
+  private def updateListMessage(name: String): Unit = {
+    frontend
+      .foreach(fr => fr.tell(UpdateMessage(name)))
+  }
+
+  def updateMessages(messages: List[Message]): Unit = {
+    val listMessage = new ListView[Message]
+    for (i <- messages) {
+      listMessage.getItems.add(i)
+    }
+    if (!listMessage.getItems.isEmpty)
+      if (!messageList.getItems.containsAll(listMessage.getItems)) {
+        Platform.runLater(new Runnable() {
+          override def run(): Unit = {
+            messageList.getItems.clear()
+            messageList.getItems.addAll(listMessage.getItems)
+          }
+        })
       }
-    }.start()
   }
 
+  def setMyContact(contacts: Contacts): Unit = myContact.setValue(contacts)
 
-}
-
-class MyTimerTask extends TimerTask {
-  var Ctr: ControllerScala = null
-
-  def upd(Ctr: ControllerScala): Unit = {
-    this.Ctr = Ctr
-  }
-
-  override def run(): Unit = {
-    Ctr.startThread()
-  }
 }

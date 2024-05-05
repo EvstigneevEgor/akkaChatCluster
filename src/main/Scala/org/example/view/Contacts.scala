@@ -1,40 +1,39 @@
 package org.example.view
 
-class Contacts(adr: String, name: String, me: Boolean)/* extends Ordered[Contacts]*/ {
-  val address: String = adr
-  var Name: String = name
-  var itsMe: Boolean = me
+import org.example.CborSerializable
 
-  def getName = Name
+case class Contacts(adr: String, var name: String, me: Boolean) extends CborSerializable {
+  private val address: String = adr
+  private val itsMe: Boolean = me
 
-  //def setName = Name
-  def getAdress = address
+  def getName: String = name
 
+  def setName(s: String): Unit = name = s
 
-
-   def <(that: Contacts): Boolean = {
+  def <(that: Contacts): Boolean = {
     if (itsMe && !that.itsMe)
       true
-    else if (Name < that.Name)
+    else if (name < that.name)
       true
     else
       false
   }
 
   override def toString: String = {
-    if(this != null)
-    "address = " + address + " name = " + Name
+    if (this != null)
+      "address = " + address + " name = " + name
     else
       "null"
   }
 
-   def compare(that: Contacts): Boolean = {
-    if(that.Name=="\u041e\u0431\u0449\u0438\u0439\u0020\u0447\u0430\u0442")
-     if (itsMe && !that.itsMe) {
-      true
-    }else {
-      Name < that.Name
-    }
+  def compare(that: Contacts): Boolean = {
+    if (that.name == "Общий чат")
+      if (itsMe && !that.itsMe) {
+        true
+      } else {
+        name < that.name
+      }
     else
       false
-  }}
+  }
+}
